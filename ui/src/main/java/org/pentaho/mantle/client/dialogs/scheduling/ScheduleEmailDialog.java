@@ -24,9 +24,7 @@ import org.pentaho.gwt.widgets.client.wizards.IWizardPanel;
 import org.pentaho.mantle.client.messages.Messages;
 import org.pentaho.mantle.client.workspace.JsJob;
 
-import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
-import com.google.gwt.core.client.JsArrayString;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestBuilder;
@@ -54,12 +52,15 @@ public class ScheduleEmailDialog extends AbstractWizardDialog {
 
   public ScheduleEmailDialog( AbstractWizardDialog parentDialog, String filePath, JSONObject jobSchedule,
       JSONArray scheduleParams, JsJob editJob ) {
-    super( ScheduleDialogType.SCHEDULER, Messages.getString( "newSchedule" ), null, false, true );
+    super( ScheduleDialogType.SCHEDULER, Messages.getString( editJob == null ? "newSchedule" : "editSchedule" ),
+      null, false, true );
+
     this.parentDialog = parentDialog;
     this.filePath = filePath;
     this.jobSchedule = jobSchedule;
     this.scheduleParams = scheduleParams;
     this.editJob = editJob;
+
     initDialog();
   }
 
@@ -104,14 +105,7 @@ public class ScheduleEmailDialog extends AbstractWizardDialog {
     }
 
     if ( editJob != null ) {
-      String lineageId = editJob.getJobParamValue( "lineage-id" );
-      JsArrayString lineageIdValue = JavaScriptObject.createArray().cast();
-      lineageIdValue.push( lineageId );
-      JsSchedulingParameter p = JavaScriptObject.createObject().cast();
-      p.setName( "lineage-id" );
-      p.setType( "string" );
-      p.setStringValue( lineageIdValue );
-      scheduleParams.set( scheduleParams.size(), new JSONObject( p ) );
+      scheduleParams.set( scheduleParams.size(), ScheduleParamsHelper.generateLineageId( editJob ) );
     }
 
     scheduleRequest.put( ScheduleParamsHelper.JOB_PARAMETERS_KEY, scheduleParams );

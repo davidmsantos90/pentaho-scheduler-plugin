@@ -95,7 +95,7 @@ public class NewScheduleDialog extends PromptDialogBox {
    * @deprecated Need to set callback
    */
   public NewScheduleDialog( JsJob jsJob, IDialogCallback callback, boolean isEmailConfValid ) {
-    super( Messages.getString( "newSchedule" ), Messages.getString( "next" ), Messages.getString( "cancel" ),
+    super( Messages.getString( "editSchedule" ), Messages.getString( "next" ), Messages.getString( "cancel" ),
       false, true );
 
     this.jsJob = jsJob;

@@ -69,13 +69,17 @@ public class ScheduleParamsDialog extends AbstractWizardDialog {
   private boolean newSchedule = true;
 
   public ScheduleParamsDialog( ScheduleRecurrenceDialog parentDialog, boolean isEmailConfValid, JsJob editJob ) {
-    super( ScheduleDialogType.SCHEDULER, Messages.getString( "newSchedule" ), null, false, true );
+    super( ScheduleDialogType.SCHEDULER, Messages.getString( editJob == null ? "newSchedule" : "editSchedule" ),
+      null, false, true );
+
     this.parentDialog = parentDialog;
-    filePath = parentDialog.filePath;
-    jobSchedule = parentDialog.getSchedule();
+    this.filePath = parentDialog.filePath;
+    this.jobSchedule = parentDialog.getSchedule();
     this.isEmailConfValid = isEmailConfValid;
     this.editJob = editJob;
+
     initDialog();
+
     if ( isEmailConfValid ) {
       finishButton.setText( Messages.getString( "next" ) );
     }
@@ -83,10 +87,13 @@ public class ScheduleParamsDialog extends AbstractWizardDialog {
 
   public ScheduleParamsDialog( String filePath, JSONObject schedule, boolean isEmailConfValid ) {
     super( ScheduleDialogType.SCHEDULER, Messages.getString( "runInBackground" ), null, false, true );
+
     this.filePath = filePath;
-    jobSchedule = schedule;
+    this.jobSchedule = schedule;
     this.isEmailConfValid = isEmailConfValid;
+
     initDialog();
+
     if ( isEmailConfValid ) {
       finishButton.setText( Messages.getString( "next" ) );
     }
@@ -145,7 +152,11 @@ public class ScheduleParamsDialog extends AbstractWizardDialog {
   @Override
   protected boolean onFinish() {
     scheduleParams = getScheduleParams( false );
-    setLineageIdParam();
+
+    if ( editJob != null ) {
+      scheduleParams.set( scheduleParams.size(), ScheduleParamsHelper.generateLineageId( editJob ) );
+    }
+
     if ( isEmailConfValid ) {
       showScheduleEmailDialog( scheduleParams );
     } else {
@@ -206,13 +217,6 @@ public class ScheduleParamsDialog extends AbstractWizardDialog {
       setDone( true );
     }
     return false;
-  }
-
-  private void setLineageIdParam() {
-    if ( editJob != null ) {
-      String lineageId = editJob.getJobParamValue( "lineage-id" );
-      scheduleParams.set( scheduleParams.size(), ScheduleParamsHelper.generateLineageId( lineageId ) );
-    }
   }
 
   private void showScheduleEmailDialog( final JSONArray scheduleParams ) {
