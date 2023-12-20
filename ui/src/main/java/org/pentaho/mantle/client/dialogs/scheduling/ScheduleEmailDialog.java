@@ -84,6 +84,24 @@ public class ScheduleEmailDialog extends AbstractWizardDialog {
     return true;
   }
 
+  JSONArray getFinishScheduleParams() {
+    JSONArray params = scheduleParams != null ? scheduleParams : new JSONArray();
+
+    JsArray<JsSchedulingParameter> emailParams = scheduleEmailWizardPanel.getEmailParams();
+    if ( emailParams != null ) {
+      int index = params.size();
+      for ( int i = 0; i < emailParams.length(); i++ ) {
+        params.set( index++, new JSONObject( emailParams.get( i ) ) );
+      }
+    }
+
+    if ( editJob != null ) {
+      params.set( params.size(), ScheduleParamsHelper.generateLineageId( editJob ) );
+    }
+
+    return params;
+  }
+
   /*
    * (non-Javadoc)
    *
@@ -92,22 +110,8 @@ public class ScheduleEmailDialog extends AbstractWizardDialog {
   @Override
   protected boolean onFinish() {
     final JSONObject scheduleRequest = (JSONObject) JSONParser.parseStrict( jobSchedule.toString() );
-    JsArray<JsSchedulingParameter> emailParams = scheduleEmailWizardPanel.getEmailParams();
 
-    if ( scheduleParams == null ) {
-      scheduleParams = new JSONArray();
-    }
-    if ( emailParams != null ) {
-      int index = scheduleParams.size();
-      for ( int i = 0; i < emailParams.length(); i++ ) {
-        scheduleParams.set( index++, new JSONObject( emailParams.get( i ) ) );
-      }
-    }
-
-    if ( editJob != null ) {
-      scheduleParams.set( scheduleParams.size(), ScheduleParamsHelper.generateLineageId( editJob ) );
-    }
-
+    scheduleParams = getFinishScheduleParams();
     scheduleRequest.put( ScheduleParamsHelper.JOB_PARAMETERS_KEY, scheduleParams );
 
     RequestBuilder scheduleFileRequestBuilder = ScheduleHelper.buildRequestForJob( editJob, scheduleRequest );

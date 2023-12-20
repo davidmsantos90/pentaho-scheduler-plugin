@@ -20,6 +20,7 @@ package org.pentaho.mantle.client.dialogs.scheduling;
 import org.pentaho.gwt.widgets.client.dialogs.IDialogCallback;
 import org.pentaho.gwt.widgets.client.dialogs.MessageDialogBox;
 import org.pentaho.gwt.widgets.client.utils.NameUtils;
+import org.pentaho.gwt.widgets.client.utils.string.StringUtils;
 import org.pentaho.gwt.widgets.client.wizards.AbstractWizardDialog;
 import org.pentaho.gwt.widgets.client.wizards.IWizardPanel;
 import org.pentaho.mantle.client.messages.Messages;
@@ -144,6 +145,16 @@ public class ScheduleParamsDialog extends AbstractWizardDialog {
     return ScheduleParamsHelper.getScheduleParams( jobSchedule, schedulingParams );
   }
 
+  JSONArray getFinishScheduleParams() {
+    JSONArray params = getScheduleParams( false );
+
+    if ( editJob != null ) {
+      params.set( params.size(), ScheduleParamsHelper.generateLineageId( editJob ) );
+    }
+
+    return params;
+  }
+
   /*
    * (non-Javadoc)
    *
@@ -151,11 +162,7 @@ public class ScheduleParamsDialog extends AbstractWizardDialog {
    */
   @Override
   protected boolean onFinish() {
-    scheduleParams = getScheduleParams( false );
-
-    if ( editJob != null ) {
-      scheduleParams.set( scheduleParams.size(), ScheduleParamsHelper.generateLineageId( editJob ) );
-    }
+    scheduleParams = getFinishScheduleParams();
 
     if ( isEmailConfValid ) {
       showScheduleEmailDialog( scheduleParams );
@@ -198,10 +205,14 @@ public class ScheduleParamsDialog extends AbstractWizardDialog {
                 afterResponseCallback.onResponse( jobSchedule.get( "runInBackground" ) );
               }
             } else {
-              MessageDialogBox dialogBox =
-                  new MessageDialogBox( Messages.getString( "error" ),
-                      Messages.getString( "serverErrorColon" ) + " " + response.getStatusCode(),
-                      false, false, true );
+              String message = response.getText();
+              if ( StringUtils.isEmpty( message ) ) {
+                message = Messages.getString( "serverErrorColon" ) + " " + response.getStatusCode();
+              }
+
+              MessageDialogBox dialogBox = new MessageDialogBox( Messages.getString( "error" ), message,
+                false, false, true );
+
               dialogBox.center();
               setDone( false );
             }
@@ -246,8 +257,8 @@ public class ScheduleParamsDialog extends AbstractWizardDialog {
         @Override
         public void onResponseReceived( Request request, Response response ) {
           if ( scheduleEmailDialog == null ) {
-            scheduleEmailDialog =
-                new ScheduleEmailDialog( ScheduleParamsDialog.this, filePath, jobSchedule, scheduleParams, editJob );
+            scheduleEmailDialog = ScheduleHelper.getImpl()
+              .createScheduleEmailDialog( ScheduleParamsDialog.this, filePath, jobSchedule, scheduleParams, editJob );
             scheduleEmailDialog.setCallback( callback );
           } else {
             scheduleEmailDialog.setScheduleParams( scheduleParams );

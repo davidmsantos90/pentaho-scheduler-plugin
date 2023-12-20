@@ -25,6 +25,7 @@ import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONValue;
 import org.pentaho.gwt.widgets.client.dialogs.MessageDialogBox;
 import org.pentaho.mantle.client.dialogs.scheduling.ScheduleEmailDialog;
+import org.pentaho.mantle.client.dialogs.scheduling.ScheduleHelper;
 import org.pentaho.mantle.client.dialogs.scheduling.ScheduleOutputLocationDialog;
 import org.pentaho.mantle.client.dialogs.scheduling.ScheduleParamsDialog;
 import org.pentaho.mantle.client.dialogs.scheduling.ScheduleParamsHelper;
@@ -99,7 +100,9 @@ public class RunInBackgroundCommandUtils implements IRunInBackgroundCommandUtils
   @Override
   public void createScheduleParamsDialog( String filePath, JSONObject scheduleRequest, Boolean isEmailConfigValid,
                                           Boolean isSchedulesPerspectiveActive ) {
-    ScheduleParamsDialog dialog = new ScheduleParamsDialog( filePath, scheduleRequest, isEmailConfigValid );
+    ScheduleParamsDialog dialog = ScheduleHelper.getImpl()
+      .createScheduleParamsDialog( filePath, scheduleRequest, isEmailConfigValid );
+
     dialog.center();
     dialog.setAfterResponseCallback(
       new ScheduleParamsDialog.IAfterResponse() {
@@ -129,7 +132,8 @@ public class RunInBackgroundCommandUtils implements IRunInBackgroundCommandUtils
   }
 
   @Override public void createScheduleEmailDialog( String filePath, JSONObject scheduleRequest ) {
-    ScheduleEmailDialog scheduleEmailDialog = new ScheduleEmailDialog( null, filePath, scheduleRequest, null, null );
+    ScheduleEmailDialog scheduleEmailDialog = ScheduleHelper.getImpl()
+      .createScheduleEmailDialog( null, filePath, scheduleRequest, null, null );
     scheduleEmailDialog.center();
   }
 

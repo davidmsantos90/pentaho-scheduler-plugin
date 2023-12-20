@@ -17,11 +17,12 @@
 
 package org.pentaho.mantle.client.dialogs.scheduling;
 
+import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import org.pentaho.gwt.widgets.client.dialogs.IDialogCallback;
 import org.pentaho.gwt.widgets.client.dialogs.MessageDialogBox;
 import org.pentaho.gwt.widgets.client.filechooser.RepositoryFile;
-import org.pentaho.gwt.widgets.client.utils.string.StringUtils;
+import org.pentaho.gwt.widgets.client.wizards.AbstractWizardDialog;
 import org.pentaho.mantle.client.commands.AbstractCommand;
 import org.pentaho.mantle.client.events.EventBusUtil;
 import org.pentaho.mantle.client.events.SolutionFileActionEvent;
@@ -41,10 +42,12 @@ import com.google.gwt.json.client.JSONString;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
+@SuppressWarnings("deprecation")
 public class ScheduleHelper {
+  private static final ScheduleHelper impl = GWT.create( ScheduleHelper.class );
 
   static {
-    setupNativeHooks( new ScheduleHelper() );
+    setupNativeHooks( impl );
   }
 
   public static String JOB_SCHEDULER_URL = "api/scheduler/job";
@@ -113,7 +116,7 @@ public class ScheduleHelper {
                 if ( response.getStatusCode() == Response.SC_OK ) {
                   final boolean isEmailConfValid = Boolean.parseBoolean( response.getText() );
 
-                  NewScheduleDialog dialog = new NewScheduleDialog( fileNameWithPath, callback, isEmailConfValid );
+                  NewScheduleDialog dialog = impl.createNewScheduleDialog( fileNameWithPath, callback, isEmailConfValid );
                   dialog.center();
 
                   event.setMessage( "Open" );
@@ -292,4 +295,30 @@ public class ScheduleHelper {
     return $wnd.location.protocol + "//" + $wnd.location.host + $wnd.CONTEXT_PATH
   }-*/;
 
+  public static ScheduleHelper getImpl() {
+    return impl;
+  }
+
+  public NewScheduleDialog createNewScheduleDialog( String filePath, IDialogCallback callback,
+                                                    boolean isEmailConfValid ) {
+    return new NewScheduleDialog( filePath, callback, isEmailConfValid );
+  }
+
+  public NewScheduleDialog createNewScheduleDialog( JsJob job, IDialogCallback callback, boolean isEmailConfValid ) {
+    return new NewScheduleDialog( job, callback, isEmailConfValid );
+  }
+
+  public ScheduleParamsDialog createScheduleParamsDialog( ScheduleRecurrenceDialog dialog,
+                                                          boolean isEmailConfValid, JsJob job ) {
+    return new ScheduleParamsDialog( dialog, isEmailConfValid, job );
+  }
+
+  public ScheduleParamsDialog createScheduleParamsDialog( String path, JSONObject schedule, boolean isEmailConfValid ) {
+    return new ScheduleParamsDialog( path, schedule, isEmailConfValid );
+  }
+
+  public ScheduleEmailDialog createScheduleEmailDialog( AbstractWizardDialog parent, String filePath,
+                                                        JSONObject jobSchedule, JSONArray scheduleParams, JsJob job ) {
+    return new ScheduleEmailDialog( parent, filePath, jobSchedule, scheduleParams, job );
+  }
 }

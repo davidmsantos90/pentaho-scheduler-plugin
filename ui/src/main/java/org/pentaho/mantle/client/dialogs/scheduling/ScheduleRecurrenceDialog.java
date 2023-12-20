@@ -1042,15 +1042,18 @@ public class ScheduleRecurrenceDialog extends AbstractWizardDialog {
         @Override
         public void onResponseReceived( Request request, Response response ) {
           JSONObject scheduleRequest = (JSONObject) JSONParser.parseStrict( schedule.toString() );
+
           if ( scheduleEmailDialog == null ) {
-            scheduleEmailDialog =
-              new ScheduleEmailDialog( ScheduleRecurrenceDialog.this, filePath, scheduleRequest, null, editJob );
+            scheduleEmailDialog = ScheduleHelper.getImpl().createScheduleEmailDialog(
+              ScheduleRecurrenceDialog.this, filePath, scheduleRequest, null, editJob );
             scheduleEmailDialog.setCallback( callback );
           } else {
             scheduleEmailDialog.setJobSchedule( scheduleRequest );
           }
+
           scheduleEmailDialog.setNewSchedule( newSchedule );
           scheduleEmailDialog.center();
+
           hide();
         }
 
@@ -1087,7 +1090,8 @@ public class ScheduleRecurrenceDialog extends AbstractWizardDialog {
         @Override
         public void onResponseReceived( Request request, Response response ) {
           if ( scheduleParamsDialog == null ) {
-            scheduleParamsDialog = new ScheduleParamsDialog( ScheduleRecurrenceDialog.this, isEmailConfValid, editJob );
+            scheduleParamsDialog = ScheduleHelper.getImpl()
+              .createScheduleParamsDialog( ScheduleRecurrenceDialog.this, isEmailConfValid, editJob );
             scheduleParamsDialog.setCallback( callback );
           } else {
             scheduleParamsDialog.setJobSchedule( schedule );
